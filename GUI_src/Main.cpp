@@ -7,7 +7,6 @@
 #include <fstream>
 #include <Windows.h>
 #include <tchar.h>
-#include "Neko.h"
 
 using namespace std;
 
@@ -21,15 +20,16 @@ struct Data {
 
 //表情解析のexeを起動
 int catchcat() {
-	remove("Face.txt");
+	remove("data/result.jpg");
 
+	//コンソールを出さないためにCreateProcess
+	//文字列キャストとハンドル周りの処理
 	HRESULT hResult = E_FAIL;
 	STARTUPINFO si = {0};
 	PROCESS_INFORMATION pi = { 0 };
-	WCHAR  X[] = L"cnn_app.exe";
-	LPWSTR text = X;
+	WCHAR  X[] = L"cat_analyze.exe";
 	BOOL res = ::CreateProcess(NULL, X, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-	if (0 == res) return -1;
+	if (0 == res) return (HRESULT_FROM_WIN32(::GetLastError()));
 	DWORD dwResult = ::WaitForSingleObject(
 		pi.hProcess
 		, INFINITE
@@ -42,7 +42,8 @@ int catchcat() {
 	::CloseHandle(pi.hProcess);
 	::CloseHandle(pi.hThread);
 
-	ifstream ifa("Face.txt");
+	//結果が出ていればIsFlagを1 出ていなければエラーとして2
+	ifstream ifa("data/result.jpg");
 	if (!ifa.fail()) IsFlag = 1;
 	else IsFlag = 2;
 	ifa.close();
@@ -56,7 +57,6 @@ private:
 	const Font font, imgFont;
 	const Rect imgRect;
 	Size imgDraw;
-	float mag;
 
 public:
 	Title(const InitData& init)
@@ -77,7 +77,9 @@ public:
 			}
 		}
 		//ボタン
-		if (SimpleGUI::Button(U"解析開始", Vec2(350, 500))) {
+		if (SimpleGUI::Button(U"解析開始", Vec2(350, 550))) {
+			IsFirst = true;
+			IsFlag = 0;
 			changeScene(U"CatFace");
 		}
 	}
@@ -106,9 +108,6 @@ class CatFace : public App::Scene {
 private:
 	const Font font;
 	Size imgDraw;
-	int CatFlag = 0;
-	int result=0;
-	int i, Flag=0, ret,count;
 
 public:
 	CatFace(const InitData& init)
@@ -118,18 +117,19 @@ public:
 	}
 
 	void update() override {
-
+		//一回だけ解析をかける
 		if (IsFirst) {
 			catchcat();
 			IsFirst = false;
 		}
 
+		//IsFlagの状態で分岐
 		switch (IsFlag) {
 		case 1:
 			changeScene(U"Result");
 			break;
 		case 2:
-			if (SimpleGUI::Button(U"最初へ戻る", Vec2(350, 500))) {
+			if (SimpleGUI::Button(U"最初に戻る", Vec2(350, 550))) {
 				changeScene(U"Title");
 			}
 		}
@@ -141,10 +141,10 @@ public:
 		// テキスト
 		switch (IsFlag) {
 		case 0:
-			font(U"ねこを探しています").draw(10, 10, Palette::Black);
+			font(U"ねこを見つめています．お待ちください").draw(10, 10, Palette::Black);
 			break;
 		case 2:
-			font(U"ねこが見当たりません").draw(10, 10, Palette::Black);
+			font(U"ねこを見つけられませんでした").draw(10, 10, Palette::Black);
 			break;
 		}
 		//ねこ画像
@@ -155,17 +155,19 @@ public:
 
 };
 
+//結果シーン
 class Result : public App::Scene {
 private:
 	const Font font;
 	Size imgDraw;
+	Texture result;
 
 public:
 	Result(const InitData& init)
 		:IScene(init)
 		, font(40)
 		, imgDraw(600, 400) {
-
+		result = Texture(U"data/result.jpg");
 	}
 
 	void update() override {
@@ -181,8 +183,8 @@ public:
 		//テキスト
 		font(U"ねこはこんな顔をしています").draw(10, 10, Palette::Black);
 		//ねこ画像
-		if (getData().cat.size().x > getData().cat.size().y) getData().cat.resized(imgDraw.x).drawAt(Scene::Center());
-		else getData().cat.resized(imgDraw.y).drawAt(Scene::Center());
+		if (result.size().x > result.size().y) result.resized(imgDraw.x).drawAt(Scene::Center());
+		else result.resized(imgDraw.y).drawAt(Scene::Center());
 	}
 };
 
