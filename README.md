@@ -1,25 +1,32 @@
-# Neko_feel
+# Neko_feeling
 Do you understand the feelings of cats?
 
-これはなに：
+## これはなに：
 ねこのきもちを考えてみるアプリです．
-tensorflowを用いて，切り取ったねこの顔画像から表情を分類します．
-表情は5クラス，教師データは全部で4800枚ほどです．
+OpenCVんの分類機で切り取ったねこの顔画像から，TensorFlowで表情を分類します．
+表情は5クラス，教師データは全部で4800枚ほどです(私の主観で分類しました)．
 
-動作解説：
+## 使い方：
+Neko_feeling.exeを起動し，枠内にねこの画像をドラッグアンドドロップします．
+そのまま"解析開始"ボタンを押すとアプリがねこの顔を眺めてどんな顔をしていそうか考えます．
+仕様上，結構時間がかかってしまうのでちょっと待っててあげてください．
+結果が出ると，ねこの顔を白枠で囲い，推測結果を白文字で枠の下に表示します．
+もしねこの顔がわからなかったりすると，見つけられなかったと言われます．"最初に戻る"ボタンを押して，別の画像を試してみてください．
+
+## 動作解説：
 本アプリはGUIの部分をC++(Siv3D)，分類部分をPythonで作っています．
 分類部分をPyInstallerでexe化して配置しておき，GUIのコードから実行させる形で組み合わせています．(頭のいい方法が思いつかなかった)
-分類部分はOpenCVでねこの顔を検出し切り取り→tensorflowの学習済みモデルに入れて分類という流れです．
+分類部分はOpenCVでねこの顔を検出し切り取り→tensorflowの学習済みモデルに入れて分類という流れです．なので動作が遅い．なんてこった．
 
-ファイル詳細：
+## ファイル詳細：
 cnn_train.py 画像分類を学習する人
 cnn_app.py 学習済みモデルで分類する人
 cat_analyze.py ねこの顔画像を切り取り，分類にかける人
 cat_analyze.exe ↑の人がPyInstallerでexe化された姿
 Neko_GUI/Main.cpp GUIのコード
-model.ckpt.* 学習済みモデルデータ
+model_data/model.ckpt.* 学習済みモデルデータ
 label.txt クラスラベル．学習すると生成される
 
-外部参照：
+## 外部参照：
 ねこの顔検出に使用したカスケードファイルはこちらからお借りしました
-・https://github.com/wellflat/cat-fancier/tree/master/detector/models/cat
+・[OpenCVで猫検出](https://qiita.com/wellflat/items/c6ffae99be35cecc5680 "OpenCVで猫検出")
