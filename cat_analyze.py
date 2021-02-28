@@ -5,9 +5,13 @@ import cnn_app
 from PIL import Image, ImageFont, ImageDraw
 import numpy as np
 
+#読む画像のパス
 input_path = "data/cat.jpg"
+#出力される画像のパス
 output_path = "data/result.jpg"
+#ねこの顔分類機カスケードファイルパス
 cascade_path = "data/cascade.xml"
+#ねこ顔切り抜き画像の出力パス
 catface_path = "data/catface/"
 
 #テキスト描画関数
