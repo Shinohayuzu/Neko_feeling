@@ -2,31 +2,29 @@ import os
 import numpy as np
 import tensorflow.compat.v1 as tf
 import cv2
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
- 
-path='/test/'
-file_list=os.listdir(os.getcwd()+path)
- 
+
 i = 0
 label_name = []
- 
+
 flags = tf.app.flags
 FLAGS = flags.FLAGS
-flags.DEFINE_string('label','label.txt','File name of label')
- 
-f = open(FLAGS.label,'r')
+flags.DEFINE_string('label', 'data/label.txt', 'File name of label')
+
+#クラス辞書
+label_d = {'bikkuri':'びっくり', 'kininaru':'何か気になる','kuti':'あくび', 'magao':'真顔', 'metoji':'眠い'}
+
+f = open(FLAGS.label, 'r')
 for line in f:
-  line = line.rstrip()
-  l = line.rstrip()
-  label_name.append(l)
-  i = i + 1
- 
+    line = line.rstrip()
+    l = line.rstrip()
+    label_name.append(l)
+    i = i + 1
 NUM_CLASSES = i
 IMAGE_SIZE = 36
 POOLING_NUM = 2
-IMAGE_PIXELS = IMAGE_SIZE*IMAGE_SIZE*3
-POOLED_SIZE = int(IMAGE_SIZE / (POOLING_NUM*2))
- 
+IMAGE_PIXELS = IMAGE_SIZE * IMAGE_SIZE * 3
+POOLED_SIZE = int(IMAGE_SIZE / (POOLING_NUM * 2))
+
 # モデル作成
 def inference(images_placeholder, keep_prob):
     def weight_variable(shape):
@@ -80,14 +78,21 @@ def inference(images_placeholder, keep_prob):
  
     return y_conv
  
-if __name__ == '__main__':
+def catface_feeling() :
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+    path = '/data/catface/'
+    file_list = os.listdir(os.getcwd() + path)
+
+
+
     test_image = []
     test_filenm = []
  
     for file in file_list:
         test_filenm.append(file)
  
-        img = cv2.imread('./test/' + file )
+        img = cv2.imread("data/catface/" + file )
         img = cv2.resize(img, (IMAGE_SIZE, IMAGE_SIZE))
         test_image.append(img.flatten().astype(np.float32)/255.0)
  
@@ -104,8 +109,9 @@ if __name__ == '__main__':
     sess.run(tf.global_variables_initializer())
     saver.restore(sess, "./model.ckpt")
 
-    fs=[]
+    feel_result=[]
 
+    #結果を整理して返す
     for i in range(len(test_image)):
         accr = logits.eval(feed_dict={
             images_placeholder: [test_image[i]],
@@ -113,8 +119,6 @@ if __name__ == '__main__':
         pred = np.argmax(logits.eval(feed_dict={
             images_placeholder: [test_image[i]],
             keep_prob: 1.0 })[0])
- 
-        print(test_filenm[i]+"=>"+label_name[pred])
-        fs.append(test_filenm[i]+"=>"+label_name[pred])
-        with open("Face.txt", mode='w') as f:
-            f.write(str(fs))
+        print(test_filenm[i]+"=>"+label_name[pred]) #デバッグ用
+        feel_result.append(label_d[label_name[pred]])
+    return feel_result

@@ -118,9 +118,7 @@ if __name__ == '__main__':
       for file in file_list:
  
         img = cv2.imread('./data/' + folder + '/' + file)
-        #img = cv2.Canny(img, 100, 600)
         img = cv2.resize(img, (IMAGE_SIZE, IMAGE_SIZE))
-        #img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
         if i <= file_rate:
            train_image.append(img.flatten().astype(np.float32)/255.0)
            tmp = np.zeros(NUM_CLASSES)
