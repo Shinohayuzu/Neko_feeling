@@ -35,7 +35,7 @@ cat_analyze.py ねこの顔画像を切り取り，分類にかける人
 
 cat_analyze.exe ↑の人がPyInstallerでexe化された姿
 
-Neko_GUI/Main.cpp GUIのコード
+Neko_GUI/Main.cpp GUIのコード．Siv3Dを使用して作っています．
 
 model_data/model.ckpt.* 学習済みモデルデータ
 
